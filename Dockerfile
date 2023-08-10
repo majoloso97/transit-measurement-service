@@ -20,5 +20,8 @@ RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 # So, it's important to put this near the end of the Dockerfile, to optimize the container image build times.
 COPY ./src /app/src
 
+# Install OS libraries for running CV2
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
 # Set the command to run the uvicorn server.
 CMD ["python", "src/main.py"]
