@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from api.dependencies.auth import api_key_auth
+from database.models import printing
 
 
 router = APIRouter(prefix='/api/v1')
@@ -12,4 +13,4 @@ async def welcome():
 
 @router.get('/protected/', dependencies=[Depends(api_key_auth)])
 async def protected():
-    return {"message": "You passed security"}
+    return {"message": f'Yes, {printing()}'}
