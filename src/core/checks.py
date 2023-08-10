@@ -1,3 +1,4 @@
 import ultralytics
 
-checks = ultralytics.checks()
+def get_ultralytics_checks():
+    return ultralytics.checks()
