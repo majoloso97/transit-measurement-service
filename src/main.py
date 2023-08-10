@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from settings import settings
 from api.routes.v1 import welcome
+from api.routes.v1 import checks
 
 
 app = FastAPI(title="Service for video processing in transit measurment app",
@@ -11,6 +12,7 @@ app = FastAPI(title="Service for video processing in transit measurment app",
                 model for ML operations.")
 
 app.include_router(welcome.router)
+app.include_router(checks.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app",
