@@ -1,8 +1,8 @@
 version: '3.4'
 
 services:
-  noble_etl:
-    image: transit_measurement_service
+  transit_measurement_video_service:
+    image: transit_measurement_video_service
     container_name: transit_measurement_service
     environment:
       - MODEL_NAME=${MODEL_NAME}
@@ -11,8 +11,9 @@ services:
       - AUTO_RELOAD=${AUTO_RELOAD}
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.video
     volumes:
-      - ./src:/app/src
+      - ./database:/app/src/database
+      - ./video-service/src:/app/src
     ports:
       - "80:80"
