@@ -3,7 +3,7 @@ version: '3.4'
 services:
   transit_measurement_video_service:
     image: transit_measurement_video_service
-    container_name: transit_measurement_service
+    container_name: transit_measurement_video_service
     environment:
       - MODEL_NAME=${MODEL_NAME}
       - LOG_LEVEL=${LOG_LEVEL}
@@ -16,4 +16,21 @@ services:
       - ./database:/app/src/database
       - ./video-service/src:/app/src
     ports:
+      - "81:80"
+  transit_measurement_api_service:
+    image: transit_measurement_api_service
+    container_name: transit_measurement_api_service
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL}
+      - FAST_API_KEY=${FAST_API_KEY}
+      - AUTO_RELOAD=${AUTO_RELOAD}
+    build:
+      context: .
+      dockerfile: ./Dockerfile.api
+    volumes:
+      - ./database:/app/src/database
+      - ./api-service/src:/app/src
+    ports:
       - "80:80"
+    depends_on:
+      - transit_measurement_video_service
