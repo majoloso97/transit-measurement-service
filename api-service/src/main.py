@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from settings import settings
 from api.events.start import start_handler
-from api.routes.v1 import welcome, image
+from api.routes.v1 import welcome
 
 
 app = FastAPI(title="Service for video processing in transit measurment app",
@@ -14,7 +14,6 @@ app = FastAPI(title="Service for video processing in transit measurment app",
 app.add_event_handler('startup', start_handler(app))
 
 app.include_router(welcome.router)
-app.include_router(image.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app",
