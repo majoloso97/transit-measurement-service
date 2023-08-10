@@ -9,7 +9,7 @@ LINE_END = sv.Point(1280, 360)
 
 
 def main():
-    generator = sv.get_video_frames_generator('assets/vid.mp4')
+    generator = sv.get_video_frames_generator('src/core/assets/vid.mp4')
     print('testing')
     # create instance of BoxAnnotator
     box_annotator = sv.BoxAnnotator(thickness=1, text_thickness=1, text_scale=0.75)
@@ -43,5 +43,5 @@ def main():
     ]
     # annotate and display frame
     frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
-    with ImageSink(target_dir_path='assets') as sink:
-        sink.save_image(frame, 'test')
+    with ImageSink(target_dir_path='src/core/assets') as sink:
+        sink.save_image(image=frame, image_name='predicted.png')
