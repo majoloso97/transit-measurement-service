@@ -17,6 +17,8 @@ services:
       - ./video-service/src:/app/src
     ports:
       - "81:80"
+    depends_on:
+      - transit_measurement_service_db
   transit_measurement_api_service:
     image: transit_measurement_api_service
     container_name: transit_measurement_api_service
@@ -34,3 +36,20 @@ services:
       - "80:80"
     depends_on:
       - transit_measurement_video_service
+transit_measurement_service_db:
+    image: mysql:8.0
+    container_name: transit_measurement_service_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: transit_measurement_service_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: admin
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - transit_measurement_service_db:/var/lib/mysql
+volumes:
+  transit_measurement_service_db:
