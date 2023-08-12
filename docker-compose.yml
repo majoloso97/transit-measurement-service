@@ -19,6 +19,7 @@ services:
       - "81:80"
     depends_on:
       - transit_measurement_service_db
+      - transit_measurement_service_queue
   transit_measurement_api_service:
     image: transit_measurement_api_service
     container_name: transit_measurement_api_service
@@ -51,5 +52,20 @@ services:
       - '3306'
     volumes:
       - transit_measurement_service_db:/var/lib/mysql
+  transit_measurement_service_queue:
+    image: redis:7.0.12-alpine
+    container_name: transit_measurement_service_queue
+    restart: always
+    environment:
+      REDIS_LOG_LEVEL: ${REDIS_LOG_LEVEL}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: /bin/sh -c "redis-server --loglevel $$REDIS_LOG_LEVEL --requirepass $$REDIS_PASSWORD"
+    ports:
+      - '6379:6379'
+    expose:
+      - '6379'
+    volumes:
+      - transit_measurement_service_queue:/data
 volumes:
   transit_measurement_service_db:
+  transit_measurement_service_queue:
