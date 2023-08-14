@@ -1,7 +1,7 @@
-from pydantic_settings import BaseSettings
+from shared.shared_settings import SharedSettings
 
 
-class Settings(BaseSettings):
+class Settings(SharedSettings):
     MODEL_NAME: str
     FAST_API_KEY: str
     LOG_LEVEL: str = 'INFO'
