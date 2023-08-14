@@ -9,11 +9,13 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - FAST_API_KEY=${FAST_API_KEY}
       - AUTO_RELOAD=${AUTO_RELOAD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     build:
       context: .
       dockerfile: ./Dockerfile.video
     volumes:
-      - ./database:/app/src/database
+      - ./shared:/app/src/shared
       - ./video-service/src:/app/src
     ports:
       - "81:80"
@@ -27,11 +29,13 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - FAST_API_KEY=${FAST_API_KEY}
       - AUTO_RELOAD=${AUTO_RELOAD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     build:
       context: .
       dockerfile: ./Dockerfile.api
     volumes:
-      - ./database:/app/src/database
+      - ./shared:/app/src/shared
       - ./api-service/src:/app/src
     ports:
       - "80:80"
@@ -47,9 +51,9 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - '3306:3306'
+      - '3305:3306'
     expose:
-      - '3306'
+      - '3305'
     volumes:
       - transit_measurement_service_db:/var/lib/mysql
   transit_measurement_service_queue:
