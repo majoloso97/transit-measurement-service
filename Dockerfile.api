@@ -5,7 +5,7 @@ FROM python:3.11-slim
 # This is where we'll put the requirements.txt file and the app directory.
 WORKDIR /app
 
-COPY ./database /app/src/database
+COPY ./shared /app/src/shared
 
 # Copy the file with the requirements to the /code directory.
 
