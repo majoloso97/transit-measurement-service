@@ -42,20 +42,19 @@ services:
     depends_on:
       - transit_measurement_video_service
   transit_measurement_service_db:
-    image: mysql:8.0
+    image: postgres:14.2-alpine
     container_name: transit_measurement_service_db
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '3305:3306'
+      - '3305:5432'
     expose:
       - '3305'
     volumes:
-      - transit_measurement_service_db:/var/lib/mysql
+      - transit_measurement_service_db:/var/lib/postgresql/data
   transit_measurement_service_queue:
     image: redis:7.0.12-alpine
     container_name: transit_measurement_service_queue
