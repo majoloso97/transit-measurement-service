@@ -1,7 +1,7 @@
 import logging
 from typing import Callable
 from fastapi import FastAPI
-from database.models import printing
+from shared.database.models import printing
 from core.checks import get_ultralytics_checks
 
 
