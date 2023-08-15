@@ -4,6 +4,9 @@ FROM python:3.11
 # Set the current working directory to /app.
 WORKDIR /app
 
+# Install OS libraries for running CV2
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
 # Copy and install file with shared requirements to the /src directory.
 COPY ./shared/shared_requirements.txt /app/shared_requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /app/shared_requirements.txt
@@ -11,9 +14,6 @@ RUN pip install --no-cache-dir --upgrade -r /app/shared_requirements.txt
 # Copy and install file with service requirements to the /src directory.
 COPY ./video-service/service_requirements.txt /app/service_requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /app/service_requirements.txt
-
-# Install OS libraries for running CV2
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 # Copy the ./shared directory into the /src directory.
 # This is done so this and other services can work with the same code.
