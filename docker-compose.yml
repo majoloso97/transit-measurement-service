@@ -5,12 +5,19 @@ services:
     image: transit_measurement_video_service
     container_name: transit_measurement_video_service
     environment:
-      - MODEL_NAME=${MODEL_NAME}
       - LOG_LEVEL=${LOG_LEVEL}
-      - FAST_API_KEY=${FAST_API_KEY}
-      - AUTO_RELOAD=${AUTO_RELOAD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_KEY_ID=${AWS_KEY_ID}
+      - AWS_SECRET=${AWS_SECRET}
+      - MODEL_NAME=${MODEL_NAME}
     build:
       context: .
       dockerfile: ./Dockerfile.video
@@ -27,10 +34,20 @@ services:
     container_name: transit_measurement_api_service
     environment:
       - LOG_LEVEL=${LOG_LEVEL}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_LOG_LEVEL=${REDIS_LOG_LEVEL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_KEY_ID=${AWS_KEY_ID}
+      - AWS_SECRET=${AWS_SECRET}
       - FAST_API_KEY=${FAST_API_KEY}
       - AUTO_RELOAD=${AUTO_RELOAD}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
     build:
       context: .
       dockerfile: ./Dockerfile.api
