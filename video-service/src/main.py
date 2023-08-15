@@ -1,13 +1,13 @@
 import time
 import logging
-# from core.checks import get_ultralytics_checks
+from core.checks import get_ultralytics_checks
 
 
 logging.root.setLevel(logging.INFO)
 
 
 def run_video_service():
-    # get_ultralytics_checks()
+    get_ultralytics_checks()
     while True:
         logging.info('Running Video Service')
         time.sleep(60)
