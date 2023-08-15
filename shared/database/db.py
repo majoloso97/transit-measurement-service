@@ -7,13 +7,13 @@ from settings import settings
 
 class DbService:
     def __init__(self) -> None:
-        # try:
+        try:
             self.engine = create_engine(self.get_url())
             Base.metadata.create_all(self.engine)
             self.session = sessionmaker(self.engine)
             self.is_active = True
-        # except Exception:
-        #     self.is_active = False
+        except Exception:
+            self.is_active = False
 
     def get_url(self):
         url = URL.create(drivername='postgresql',
