@@ -10,7 +10,8 @@ class DbService:
         try:
             self.engine = create_engine(self.get_url())
             Base.metadata.create_all(self.engine)
-            self.session = sessionmaker(self.engine)
+            self.session = sessionmaker(bind=self.engine,
+                                        expire_on_commit=False)
             self.is_active = True
         except Exception:
             self.is_active = False
