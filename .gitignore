@@ -49,3 +49,5 @@ cov_data/
 # Storage
 *.csv
 *.xlsx
+*.png
+*.mp4
