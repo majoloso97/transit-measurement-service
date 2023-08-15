@@ -1,6 +1,4 @@
 pydantic
 pydantic-settings
-fastapi
-uvicorn[standard]
 redis
 boto3
