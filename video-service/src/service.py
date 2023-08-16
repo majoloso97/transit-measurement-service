@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import logging
@@ -15,14 +16,13 @@ def run_video_service(logger: logging.Logger):
     logger.info('Postgres database connected')
     logger.info('Redis queue connected')
     get_ultralytics_checks()
-    # path = os.path.isfile(f'/app/src/core/assets/vid.mp4')
-    # vid = VideoProcessor(path)
-    # logger.info(vid.metadata)
-    # logger.info(dict(vid.metadata))
+    path_vid = '/app/src/core/assets/vid.mp4'
+    vid = VideoProcessor(path_vid)
+    logger.info(vid.metadata.dict())
     while True:
         logger.info('Running Video Service')
         try:
-            time.sleep(60)
+            time.sleep(600)
         except:
             logger.warning(f'Ending video service process')
             sys.exit(0)
