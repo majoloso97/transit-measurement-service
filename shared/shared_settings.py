@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 
 class SharedSettings(BaseSettings):
     LOG_LEVEL: str = 'INFO'
+    AUTO_RELOAD: bool = False
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_DB: str
