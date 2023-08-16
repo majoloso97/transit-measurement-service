@@ -1,27 +1,28 @@
-import time
+import os
 import logging
+from watchfiles import run_process
 from settings import settings
-from core.checks import get_ultralytics_checks
-from shared.database.db import db
-from shared.queue.queue import q
+from log_config import setup_logger
+from service import run_video_service
 
 
-logging.root.setLevel(logging.getLevelName(settings.LOG_LEVEL))
-logger = logging.getLogger(__name__)
+setup_logger(logging.root)
+logger = logging.getLogger('main')
 
 
-def run_video_service():
-    get_ultralytics_checks()
-    if not db.is_active:
-        raise ConnectionError('Database not connected')
-    if not q.ping():
-        raise ConnectionError('Database not connected')
-    logger.info('Postgres database connected')
-    logger.info('Redis queue connected')
-    while True:
-        logging.info('Running Video Service')
-        time.sleep(60)
+def autoreload_callback(changes):
+    msg = 'Changes detected in {file_name}'
+    filename = list(changes)[0][1]
+    logger.info(msg.format(file_name=filename))
+    logger.info('Auto-reloading process')
 
 
 if __name__ == "__main__":
-    run_video_service()
+    if settings.AUTO_RELOAD:
+        logger.info(f'Auto-reload is on. Will watch files in {os.getcwd()}')
+        run_process('.',
+                    target=run_video_service,
+                    args=(logger,),
+                    callback=autoreload_callback)
+    else:
+        run_video_service(logger)
