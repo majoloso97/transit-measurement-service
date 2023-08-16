@@ -18,6 +18,7 @@ services:
       - AWS_KEY_ID=${AWS_KEY_ID}
       - AWS_SECRET=${AWS_SECRET}
       - MODEL_NAME=${MODEL_NAME}
+      - AUTO_RELOAD=${AUTO_RELOAD}
     build:
       context: .
       dockerfile: ./Dockerfile.video
