@@ -1,5 +1,8 @@
 import os
+from supervision import get_video_frames_generator
 from supervision.utils.video import VideoInfo
+from shared.database.db import db
+from shared.database.models import Video
 from core.types import VideoMetadata
 from core.model import model
 
@@ -26,5 +29,15 @@ class VideoProcessor:
         is_valid_in_filesystem = os.path.isfile(video_path)
         if not is_valid_in_filesystem:
             raise ValueError('Returned string is not a valid path')
-        
+
         return True
+
+    def predict_from_frame(self):
+        vid_generator = get_video_frames_generator(self.path)
+        iterator = iter(vid_generator)
+        for _ in range(100):
+            frame = next(iterator)
+        return frame
+
+    def process_frame_detections(self, frame):
+        results = model(frame)
