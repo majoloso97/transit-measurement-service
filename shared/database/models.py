@@ -1,5 +1,5 @@
-from sqlalchemy import (Column, text, func,
-                        String, DateTime)
+from sqlalchemy import (Column, text,
+                        String, DateTime, Integer)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 
@@ -15,3 +15,7 @@ class Video(Base):
     uploaded_at = Column(DateTime(timezone=True),
                          server_default=text("(now() at time zone 'utc')"))
     name = Column(String(150))
+    width = Column(Integer)
+    height = Column(Integer)
+    fps = Column(Integer)
+    total_frames = Column(Integer)
