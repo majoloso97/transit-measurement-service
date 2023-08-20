@@ -31,6 +31,13 @@ class DbService:
         with self.session.begin() as session:
             session.add(record)
             session.commit()
+    
+    def retrieve_all(self, model):
+        if not self.is_active:
+            raise ConnectionError('DB not connected')
+        with self.session.begin() as session:
+            records = session.query().all()
+        return records
 
 
 db = DbService()
