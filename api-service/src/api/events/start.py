@@ -2,7 +2,6 @@ import logging
 from typing import Callable
 from fastapi import FastAPI
 from shared.database.db import db
-from shared.database.models import Video
 from shared.queue.queue import q
 
 
