@@ -1,3 +1,5 @@
+import logging
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker
@@ -5,16 +7,12 @@ from shared.database.models import Base
 from settings import settings
 
 
-class DbService:
+logger = logging.getLogger(__name__)
+
+
+class DBService:
     def __init__(self) -> None:
-        try:
-            self.engine = create_engine(self.get_url())
-            Base.metadata.create_all(self.engine)
-            self.session = sessionmaker(bind=self.engine,
-                                        expire_on_commit=False)
-            self.is_active = True
-        except Exception:
-            self.is_active = False
+        self.start_db()
 
     def get_url(self):
         url = URL.create(drivername='postgresql',
@@ -25,19 +23,28 @@ class DbService:
                          database=settings.POSTGRES_DB)
         return url
 
-    def save(self, record):
-        if not self.is_active:
-            raise ConnectionError('DB not connected')
-        with self.session.begin() as session:
-            session.add(record)
-            session.commit()
-    
-    def retrieve_all(self, model):
-        if not self.is_active:
-            raise ConnectionError('DB not connected')
-        with self.session.begin() as session:
-            records = session.query().all()
-        return records
+    def start_db(self):
+        try:
+            self.engine = create_engine(self.get_url())
+            Base.metadata.create_all(self.engine)
+            self.Session = sessionmaker(bind=self.engine,
+                                        expire_on_commit=False)
+            self.is_active = True
+        except Exception:
+            logger.error("Couln't start connection with database")
+            self.is_active = False
+
+    @contextmanager
+    def get_session(self):
+        if self.is_active and self.Session:
+            session = self.Session()
+            try:
+                with session.begin():
+                    yield session
+            finally:
+                session.close()
+        else:
+            raise ConnectionError('Database is not connected')
 
 
-db = DbService()
+db = DBService()
