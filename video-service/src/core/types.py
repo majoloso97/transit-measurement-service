@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import numpy as np
 
 
@@ -10,10 +10,9 @@ class VideoMetadata(BaseModel):
 
 
 class FrameDetection(BaseModel):
-    xyxy: np.array
-    confidence: np.array
-    class_id: np.array
-    class_label: np.array
+    xyxy: type[np.ndarray]
+    confidence: type[np.ndarray]
+    class_id: type[np.ndarray]
+    class_label: type[np.ndarray]
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed = True)
