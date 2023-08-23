@@ -32,6 +32,8 @@ class Video(Base):
     uploaded_at = Column(DateTime(timezone=True),
                          server_default=text("(now() at time zone 'utc')"))
     name = Column(String(150))
+    path = Column(String(150))
+    is_active = Column(Boolean)
     width = Column(Integer)
     height = Column(Integer)
     fps = Column(Integer)
