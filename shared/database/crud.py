@@ -32,7 +32,6 @@ class CRUDManager:
                         .query(self.db_model) \
                         .filter(self.db_model.id == item_id) \
                         .first()
-        print(db_item)
         if db_item:
             return self.pydantic_response.from_orm(db_item)
         
