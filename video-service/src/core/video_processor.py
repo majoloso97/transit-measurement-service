@@ -1,26 +1,44 @@
 import os
 from supervision import get_video_frames_generator
 from supervision.utils.video import VideoInfo
-from shared.database.db import db
-from shared.database.models import Video
-from shared.schemas.videos import VideoMetadata, FrameDetection
 from core.model import model
+from shared.database.crud import CRUDManager
+from shared.database.models import Video
+from shared.schemas.videos import (VideoSchema,
+                                   NewVideo,
+                                   UpdateVideoMetadata,
+                                   FrameDetection)
 
 
 class VideoProcessor:
-    def __init__(self, video_path: str) -> None:
-        is_valid = self._validate_video_path(video_path)
-        if is_valid:
-            self.path = video_path
-            self.metadata = self.get_video_metadata(video_path)
+    def __init__(self, video_id: int) -> None:
+        self.crud = CRUDManager(db_model=Video,
+                                pydantic_create=NewVideo,
+                                pydantic_update=UpdateVideoMetadata,
+                                pydantic_response=VideoSchema)
+        if isinstance(video_id, int):
+            self.video = self.crud.get_item(video_id)
+            is_valid = self._validate_video_path(self.video.path)
+            if is_valid:
+                self.save_metadata(self.video.path)
 
-    def get_video_metadata(self, video_metadata):
-        sv_metadata = VideoInfo.from_video_path(video_metadata)
-        metadata = VideoMetadata(width=sv_metadata.width,
-                                 height=sv_metadata.height,
-                                 fps=sv_metadata.fps,
-                                 total_frames=sv_metadata.total_frames)
-        return metadata
+    def save_metadata(self, video_path):
+        metadata = self.get_video_metadata(video_path)
+        self.crud.update_item(item_id=self.video.id,
+                              item_update=metadata)
+    
+    def get_video_metadata(self, video_path):
+        try:
+            sv_metadata = VideoInfo.from_video_path(video_path)
+            duration = int(sv_metadata.total_frames/sv_metadata.fps)
+            metadata = UpdateVideoMetadata(width=sv_metadata.width,
+                                           height=sv_metadata.height,
+                                           fps=sv_metadata.fps,
+                                           total_frames=sv_metadata.total_frames,
+                                           duration=duration)
+            return metadata
+        except:
+            raise RuntimeError('Video metadata could not be extracted')
 
     def _validate_video_path(self, video_path: str) -> bool:
         if not isinstance(video_path, str):
