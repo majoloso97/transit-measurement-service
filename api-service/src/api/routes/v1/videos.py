@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
-from api.dependencies.auth import get_current_active_user, decode_token
+from api.dependencies.auth import get_current_active_user
 from shared.schemas.videos import VideoSchema, NewVideo, UpdateVideoAPI
+from shared.schemas.users import UserSchema
 from shared.database.crud import CRUDManager
 from shared.database.models import Video
 
@@ -13,27 +14,33 @@ video_manager = CRUDManager(db_model=Video,
 
 
 @router.post('/')
-def create_video(video: NewVideo) -> VideoSchema:
+def create_video(video: NewVideo,
+                 current_user: UserSchema =
+                 Depends(get_current_active_user)) -> VideoSchema:
+    video.owner_id = current_user.id
     return video_manager.create_item(video)
 
 
 @router.get('/{id}/', response_model=VideoSchema)
 def get_user(id: str,
-             valid_token=Depends(decode_token)) -> VideoSchema:
+             current_user: UserSchema =
+             Depends(get_current_active_user)) -> VideoSchema:
     return video_manager.get_item(id=id)
 
 
 @router.patch('/{id}/', response_model=VideoSchema)
 def modify_user(id: str,
                 params: UpdateVideoAPI,
-                valid_token=Depends(decode_token)):
+                current_user: UserSchema =
+                Depends(get_current_active_user)):
     return video_manager.update_item(item_id=id,
                                      item_update=params)
 
 
 @router.delete('/{id}/', response_model=VideoSchema)
 async def deactivate_user(id: str,
-                          valid_token=Depends(decode_token)):
+                          current_user: UserSchema =
+                          Depends(get_current_active_user)):
     params = UpdateVideoAPI(is_active=False)
     return video_manager.update_item(item_id=id,
                                      item_update=params)
