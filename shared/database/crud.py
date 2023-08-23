@@ -16,6 +16,10 @@ class CRUDManager:
         self.pydantic_response = pydantic_response
 
     def create_item(self, item_create: BaseModel) -> BaseModel:
+        if not isinstance(item_create, self.pydantic_create):
+            err = 'Parameter item_create does not match the expected model'
+            raise TypeError(err)
+
         db_item = self.db_model(**item_create.dict())
         with self.db.get_session() as session:
             session.add(db_item)
@@ -42,6 +46,10 @@ class CRUDManager:
             return self.pydantic_response.from_orm(db_item)
 
     def update_item(self, item_id: int, item_update: BaseModel) -> BaseModel:
+        if not isinstance(item_update, self.pydantic_update):
+            err = 'Parameter item_update does not match the expected model'
+            raise TypeError(err)
+
         with self.db.get_session() as session:
             db_item = session \
                         .query(self.db_model) \
