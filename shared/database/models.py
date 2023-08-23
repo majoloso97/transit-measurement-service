@@ -33,6 +33,7 @@ class Video(Base):
                          server_default=text("(now() at time zone 'utc')"))
     name = Column(String(150))
     path = Column(String(150))
+    status = Column(String(15))
     is_active = Column(Boolean)
     width = Column(Integer)
     height = Column(Integer)
