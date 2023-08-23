@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from pydantic import EmailStr, BaseModel, ConfigDict
 
@@ -26,8 +26,8 @@ class UserSchema(BaseModel):
 class NewUser(BaseUser):
     username: str
     password: str
-    created_at: datetime = datetime.utcnow()
-    last_active: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(tz=timezone.utc)
+    last_active: datetime = datetime.now(tz=timezone.utc)
     is_active: bool = True
 
 
