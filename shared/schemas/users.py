@@ -7,7 +7,7 @@ class BaseUser(BaseModel):
     id: Optional[int] = None
 
 
-class UserSchema(BaseModel):
+class UserSchema(BaseUser):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
