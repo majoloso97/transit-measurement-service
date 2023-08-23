@@ -16,9 +16,8 @@ def run_video_service(logger: logging.Logger):
     logger.info('Postgres database connected')
     logger.info('Redis queue connected')
     get_ultralytics_checks()
-    path_vid = '/app/src/core/assets/vid.mp4'
-    vid = VideoProcessor(path_vid)
-    logger.info(vid.metadata.dict())
+    vid = VideoProcessor(video_id=2)
+    # logger.info(vid.metadata.dict())
     while True:
         logger.info('Running Video Service')
         try:
