@@ -3,7 +3,7 @@ from supervision import get_video_frames_generator
 from supervision.utils.video import VideoInfo
 from shared.database.db import db
 from shared.database.models import Video
-from core.types import VideoMetadata
+from shared.schemas.videos import VideoMetadata, FrameDetection
 from core.model import model
 
 
