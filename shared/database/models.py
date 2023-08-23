@@ -39,6 +39,7 @@ class Video(Base):
     height = Column(Integer)
     fps = Column(Integer)
     total_frames = Column(Integer)
+    duration = Column(Integer)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="videos")
