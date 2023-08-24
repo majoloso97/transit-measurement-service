@@ -115,6 +115,7 @@ class VideoProcessor:
                 progress = {model.model.names.get(k): (v[0].in_count, v[0].out_count)
                             for k, v in self.class_annotators.items()}
                 logger.info(progress)
+                # Update progress to queue
                 sink.write_frame(frame)
 
     def classify_detections(self, frame: np.ndarray,
@@ -130,12 +131,6 @@ class VideoProcessor:
                                  detections: sv.Detections,
                                  class_id: int) -> sv.Detections:
         class_mask = (detections.class_id == class_id)
-        # logger.info(f'---- Class: {model.model.names[class_id]}----')
-        # logger.info(type(detections.xyxy))
-        # logger.info(type(detections.confidence))
-        # logger.info(type(detections.class_id))
-        # logger.info(type(detections.mask))
-        # logger.info(type(detections.tracker_id))
         
         filtered_detections = sv.Detections(
             xyxy=detections.xyxy[class_mask],
@@ -147,6 +142,7 @@ class VideoProcessor:
 
     def get_box_annotator(self):
         # TODO: Adjust parameters dynamically to video size
+        # thickness = video_height % 720
         box_annotator = sv.BoxAnnotator(
             thickness=1,
             text_thickness=1,
@@ -180,6 +176,6 @@ class VideoProcessor:
         if orient == 'horizontal':
             # start = sv.Point(0, int(video_height/2))
             # end = sv.Point(video_width, int(video_height/2))
-            start = sv.Point(0, 100)
-            end = sv.Point(video_width, 100)
+            end = sv.Point(0, 100)
+            start = sv.Point(video_width, 100)
             return start, end
