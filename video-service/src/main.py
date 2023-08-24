@@ -2,7 +2,7 @@ import os
 import logging
 from watchfiles import run_process
 from settings import settings
-from log_config import setup_logger
+from shared.log_config import setup_logger
 from service import run_video_service
 
 
