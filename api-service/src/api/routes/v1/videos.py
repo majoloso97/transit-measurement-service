@@ -17,8 +17,11 @@ video_manager = CRUDManager(db_model=Video,
 def create_video(video: NewVideo,
                  current_user: UserSchema =
                  Depends(get_current_active_user)) -> VideoSchema:
+    # TODO: Upload and get S3 path
     video.owner_id = current_user.id
-    return video_manager.create_item(video)
+    saved = video_manager.create_item(video)
+    # TODO: Add video to queue
+    return saved
 
 
 @router.get('/{id}/', response_model=VideoSchema)
