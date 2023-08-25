@@ -2,5 +2,9 @@ from ultralytics import YOLO
 from settings import settings
 
 
-model = YOLO(settings.MODEL_NAME)
-model.fuse()
+def initialize_model(model_name):
+    model = YOLO(model_name)
+    model.fuse()
+    return model
+
+model = initialize_model(settings.MODEL_NAME)

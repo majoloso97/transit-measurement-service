@@ -1,8 +1,8 @@
 import os
 import logging
-from watchfiles import run_process
+from watchfiles import run_process, PythonFilter
 from settings import settings
-from log_config import setup_logger
+from shared.log_config import setup_logger
 from service import run_video_service
 
 
@@ -23,6 +23,7 @@ if __name__ == "__main__":
         run_process('.',
                     target=run_video_service,
                     args=(logger,),
-                    callback=autoreload_callback)
+                    callback=autoreload_callback,
+                    watch_filter=PythonFilter())
     else:
         run_video_service(logger)

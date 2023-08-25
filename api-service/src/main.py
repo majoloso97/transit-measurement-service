@@ -1,8 +1,10 @@
+import logging
 import uvicorn
 from fastapi import FastAPI
 from settings import settings
+from shared.log_config import setup_logger, get_uvicorn_log_config
 from api.events.start import start_handler
-from api.routes.v1 import welcome, users, auth
+from api.routes.v1 import welcome, users, auth, videos
 
 
 app = FastAPI(title="Service for video processing in transit measurment app",
@@ -16,9 +18,12 @@ app.add_event_handler('startup', start_handler(app))
 app.include_router(welcome.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(videos.router)
 
 if __name__ == "__main__":
+    setup_logger(logging.root)
     uvicorn.run("main:app",
                 host="0.0.0.0",
                 port=80,
-                reload=settings.AUTO_RELOAD)
+                reload=settings.AUTO_RELOAD,
+                log_config=get_uvicorn_log_config())
