@@ -16,3 +16,19 @@ def setup_logger(logger: logging.Logger, remove_handlers: bool = False):
 
     logger.setLevel(log_level)
     logger.addHandler(terminal_handler)
+
+
+def get_uvicorn_log_config():
+    uvicorn_log_config = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'access': {
+                'fmt': '%(asctime)s | %(name)s | %(levelname)s: %(client_addr)s - "%(request_line)s" %(status_code)s'
+            },
+            'default': {
+                'fmt': '%(asctime)s | %(name)s | %(levelname)s: %(message)s'
+            }
+        }
+    }
+    return uvicorn_log_config
