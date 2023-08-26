@@ -8,7 +8,7 @@ from shared.schemas.videos import (VideoSchema,
                                    NewVideo,
                                    UpdateVideoMetadata)
 
-MAX_FPS = 30
+MAX_FPS = 15
 MAX_BASE_DIMENSION = 360
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,8 @@ class VideoOptimizer:
                                total_frames=self.video.total_frames)
         target_path = f'{self.video.path[:-4]}_optimized.mp4'
         processor, args = self.get_processor_and_args(video_info)
-        processor(target_path, *args)
+        if processor:
+            processor(target_path, *args)
 
     def get_processor_and_args(self, video_info: VideoInfo):
         dimensions = (video_info.width, video_info.height)
@@ -76,8 +77,13 @@ class VideoOptimizer:
         if is_bigger and higher_fps:
             new_dimensions = self.get_target_dimensions(dimensions,
                                                         min_side_size)
-            fps_factor = self.video.fps * MAX_FPS
-            return self.trim_video_fps_and_rescale, (new_dimensions,
+            fps_factor = MAX_FPS / self.video.fps
+            new_video_info = VideoInfo(width=new_dimensions[0],
+                                       height=new_dimensions[1],
+                                       fps=MAX_FPS,
+                                       total_frames=self.video.total_frames)
+            return self.trim_video_fps_and_rescale, (new_video_info,
+                                                     new_dimensions,
                                                      fps_factor)
 
         if is_bigger:
@@ -90,8 +96,13 @@ class VideoOptimizer:
             return self.rescale_video, (new_video_info, new_dimensions,)
 
         if higher_fps:
-            fps_factor = self.video.fps * MAX_FPS
-            return self.trim_video_fps, (fps_factor,)
+            fps_factor = MAX_FPS / self.video.fps
+            new_video_info = VideoInfo(width=self.video.width,
+                                       height=self.video.height,
+                                       fps=MAX_FPS,
+                                       total_frames=self.video.total_frames)
+            return self.trim_video_fps, (new_video_info,
+                                         fps_factor,)
 
         return None
     
@@ -127,14 +138,8 @@ class VideoOptimizer:
         with VideoSink(target_path, video_info) as sink:
             while success:
                 success, frame = vidcap.read()
-                # sink.write_frame(frame)
                 if not success: break
                 resized = cv2.resize(frame, target_dimensions)
-                if count < 1:
-                    logger.info(f'\nFrame\n:\tType: {type(frame[0][0])}\n:\tContent: {frame[0][0]}')
-                    logger.info(f'\nResized\n:\tType: {type(resized[0][0])}\n:\tContent: {resized[0][0]}')
-                # cv2.imwrite("/app/src/core/assets/frames/frame_%04d.jpg" % count, resized)
-                # if count > 10: break
                 sink.write_frame(resized)
                 count += 1
 
