@@ -37,12 +37,12 @@ class DBService:
     @contextmanager
     def get_session(self):
         if self.is_active and self.Session:
-            session = self.Session()
-            try:
-                with session.begin():
+            # session = self.Session()
+            # try:
+                with self.Session() as session:
                     yield session
-            finally:
-                session.close()
+            # finally:
+            #     session.close()
         else:
             raise ConnectionError('Database is not connected')
 
