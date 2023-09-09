@@ -31,10 +31,10 @@ class MeasurementSchema(BaseMeasurement):
     y1: float = None
     x2: float = None
     y2: float = None
-    output_s3_key: str = None
-    detections_count: int = None
-    global_frequency: float = None
-    detections: list[DetectionSchema] = []
+    output_s3_key: Optional[str] = None
+    detections_count: Optional[int] = None
+    global_frequency: Optional[float] = None
+    detections: list[DetectionSchema] | None = None
 
 
 class UpdateMeasurement(BaseMeasurement):

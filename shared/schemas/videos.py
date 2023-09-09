@@ -25,7 +25,7 @@ class VideoSchema(BaseVideo):
     fps: Optional[int] = None
     total_frames: Optional[int] = None
     duration: Optional[int] = None
-    measurements: list[MeasurementSchema] = []
+    measurements: list[MeasurementSchema] | None = None
 
 
 class NewVideo(BaseVideo):
