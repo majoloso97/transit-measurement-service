@@ -2,6 +2,7 @@ import sys
 import time
 import logging
 from core.checks import get_ultralytics_checks
+from core.optimizer import VideoOptimizer
 from core.processor import VideoProcessor
 from shared.database.db import db
 from shared.queue.queue import q
@@ -15,8 +16,10 @@ def run_video_service(logger: logging.Logger):
     logger.info('Postgres database connected')
     logger.info('Redis queue connected')
     get_ultralytics_checks()
+    optimizer = VideoOptimizer(video_id=1)
+    optimizer.optimize()
     vid = VideoProcessor(video_id=2)
-    vid.predict()
+    # vid.predict()
     while True:
         logger.info('Running Video Service')
         try:
