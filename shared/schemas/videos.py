@@ -3,6 +3,7 @@ from typing import Optional
 from uuid import uuid4
 from pydantic import BaseModel, ConfigDict
 import numpy as np
+from .measurements import MeasurementSchema
 
 
 class BaseVideo(BaseModel):
@@ -17,23 +18,24 @@ class VideoSchema(BaseVideo):
     id: int
     is_active: bool
     name: str
-    path: str = None
-    uploaded_at: datetime
+    input_s3_key: str = None
+    created_at: datetime
     width: Optional[int] = None
     height: Optional[int] = None
     fps: Optional[int] = None
     total_frames: Optional[int] = None
     duration: Optional[int] = None
+    measurements: list[MeasurementSchema] = []
 
 
 class NewVideo(BaseVideo):
     name: str = str(uuid4())
-    path: str = None
-    uploaded_at: datetime = datetime.now(tz=timezone.utc)
+    input_s3_key: str = None
+    created_at: datetime = datetime.now(tz=timezone.utc)
     status: str = 'Created'
 
 
-class UpdateVideoAPI(BaseVideo):
+class UpdateVideo(BaseVideo):
     name: str = None
     is_active: bool = None
 
