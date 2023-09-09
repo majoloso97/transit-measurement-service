@@ -14,9 +14,9 @@ class VideoManager:
                                       pydantic_update=UpdateVideo,
                                       pydantic_response=VideoSchema)
         self.crud_measurement = CRUDManager(db_model=Measurement,
-                                            pydantic_create=NewVideo,
+                                            pydantic_create=NewMeasurement,
                                             pydantic_update=UpdateMeasurement,
-                                            pydantic_response=VideoSchema)
+                                            pydantic_response=MeasurementSchema)
         self.crud_detection = CRUDManager(db_model=Detection,
                                           pydantic_create=DetectionSchema,
                                           pydantic_update=DetectionSchema,
