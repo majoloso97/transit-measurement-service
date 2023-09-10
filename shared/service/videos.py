@@ -1,3 +1,5 @@
+from uuid import uuid4
+from settings import settings
 from shared.database.crud import CRUDManager
 from shared.database.models import Video, Measurement, Detection
 from shared.schemas.videos import VideoSchema, NewVideo, UpdateVideo
@@ -5,10 +7,14 @@ from shared.schemas.measurements import (MeasurementSchema,
                                          NewMeasurement,
                                          UpdateMeasurement,
                                          DetectionSchema)
+from shared.aws.factory import AWSServiceFactory
 
 
 class VideoManager:
     def __init__(self) -> None:
+        s3_config = {'bucket_name': settings.AWS_BUCKET_NAME}
+        self.s3 = AWSServiceFactory.get_service(service='s3',
+                                                config=s3_config)
         self.crud_video = CRUDManager(db_model=Video,
                                       pydantic_create=NewVideo,
                                       pydantic_update=UpdateVideo,
@@ -24,14 +30,22 @@ class VideoManager:
 
     def create_video(self, user_id: int, video: NewVideo) -> VideoSchema:
         video.owner_id = user_id
+        video.input_s3_key = self.generate_video_key('input')
         with self.crud_video.db.get_session() as session:
             saved = self.crud_video.create_item(session=session,
                                                 item_create=video)
+        if saved.status.upper() == 'CREATED':
+            url = self.s3.generate_presigned_url(operation='put',
+                                                 key=saved.input_s3_key)
+            saved.upload_url = url
+
+        saved = self.inject_video_urls(saved)
         return saved
     
     def create_measurement(self, video_id: int,
                            measurement: NewMeasurement) -> MeasurementSchema:
         measurement.video_id = video_id
+        measurement.output_s3_key = self.generate_video_key('predictions')
         counter_coordinates = [measurement.x1, measurement.y1,
                                measurement.x2, measurement.y2]
         if not all(counter_coordinates):
@@ -89,3 +103,26 @@ class VideoManager:
                 session=session,
                 item_id=measurement_id)
         return measurement
+
+    def generate_video_key(self, stage: str):
+        id = str(uuid4())
+        key = f'videos/{stage}/{id}.mp4'
+        return key
+    
+    def inject_video_urls(self, instance):
+        if getattr(instance, 'input_s3_key', None):
+            url = self.s3.generate_presigned_url(operation='get',
+                                                 key=instance.input_s3_key)
+            instance.input_video_url = url
+
+        if getattr(instance, 'optimized_s3_key', None):
+            url = self.s3.generate_presigned_url(operation='get',
+                                                 key=instance.optimized_s3_key)
+            instance.optimized_video_url = url
+
+        if getattr(instance, 'output_s3_key', None):
+            url = self.s3.generate_presigned_url(operation='get',
+                                                 key=instance.output_s3_key)
+            instance.output_video_url = url
+
+        return instance
