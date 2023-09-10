@@ -17,14 +17,20 @@ class VideoSchema(BaseVideo):
 
     id: int
     is_active: bool
-    name: str
-    input_s3_key: str = None
     created_at: datetime
+    name: str
+    status: Optional[str] = None
+    input_s3_key: str = None
+    upload_url: Optional[str] = None
+    input_video_url: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
     fps: Optional[int] = None
     total_frames: Optional[int] = None
     duration: Optional[int] = None
+    optimized_fps_ratio: Optional[float] = None
+    optimized_s3_key: Optional[float] = None
+    optimized_video_url: Optional[str] = None
     measurements: list[MeasurementSchema] | None = None
 
 
@@ -32,12 +38,13 @@ class NewVideo(BaseVideo):
     name: str = str(uuid4())
     input_s3_key: str = None
     created_at: datetime = datetime.now(tz=timezone.utc)
-    status: str = 'Created'
+    status: str = 'CREATED'
 
 
 class UpdateVideo(BaseVideo):
     name: str = None
     is_active: bool = None
+    status: str = None
 
 
 class UpdateVideoMetadata(BaseVideo):
@@ -46,7 +53,7 @@ class UpdateVideoMetadata(BaseVideo):
     fps: int = None
     total_frames: int = None
     duration: int = None
-    status: str = 'In Progress'
+    status: str = 'IN PROGRESS'
 
 
 class FrameDetection(BaseModel):
