@@ -16,9 +16,9 @@ def run_video_service(logger: logging.Logger):
     logger.info('Postgres database connected')
     logger.info('Redis queue connected')
     get_ultralytics_checks()
-    optimizer = VideoOptimizer(video_id=1)
-    optimizer.optimize()
-    vid = VideoProcessor(video_id=2)
+    # optimizer = VideoOptimizer(video_id=1)
+    # optimizer.optimize()
+    # vid = VideoProcessor(video_id=2)
     # vid.predict()
     while True:
         logger.info('Running Video Service')
