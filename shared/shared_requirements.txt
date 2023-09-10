@@ -4,4 +4,5 @@ numpy
 sqlalchemy
 psycopg2-binary
 redis
+requests
 boto3
