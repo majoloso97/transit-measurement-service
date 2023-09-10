@@ -20,6 +20,8 @@ services:
       - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
       - MODEL_NAME=${MODEL_NAME}
       - AUTO_RELOAD=${AUTO_RELOAD}
+      - MAX_FPS=${MAX_FPS}
+      - MAX_BASE_DIMENSION=${MAX_BASE_DIMENSION}
     build:
       context: .
       dockerfile: ./Dockerfile.video
