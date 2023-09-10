@@ -1,11 +1,10 @@
 import re
 import logging
 from datetime import datetime
-from fastapi import UploadFile
+from tempfile import SpooledTemporaryFile
 from botocore.exceptions import ClientError
 from .base import BaseAWSService
 from settings import settings
-from api.services.errors import raise_http_exception
 
 
 logger = logging.getLogger(__name__)
@@ -87,17 +86,18 @@ class S3Service(BaseAWSService):
 
     def upload_new_file_and_remove_previous(self,
                                             bucket: str,
-                                            file: UploadFile,
+                                            file_name: str,
+                                            content_type: str,
+                                            file: SpooledTemporaryFile,
                                             identifier: str):
         try:
             self.remove_existing_file(bucket=bucket, prefix=identifier)
-            file_name = file.filename
             key = self.create_unique_name(identifier=identifier,
                                           original_filename=file_name)
 
-            update_extra_args = {'ContentType': file.content_type}
+            update_extra_args = {'ContentType': content_type}
 
-            self.client.upload_fileobj(Fileobj=file.file,
+            self.client.upload_fileobj(Fileobj=file,
                                        Bucket=self.bucket,
                                        Key=key,
                                        ExtraArgs=update_extra_args)
