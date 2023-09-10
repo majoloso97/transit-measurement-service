@@ -4,7 +4,6 @@ from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from botocore.exceptions import ClientError
 from .base import BaseAWSService
-from settings import settings
 
 
 logger = logging.getLogger(__name__)
@@ -12,13 +11,15 @@ logger = logging.getLogger(__name__)
 
 class S3Service(BaseAWSService):
     SERVICE_NAME = 's3'
+    ENDPOINT_URL = 'https://s3.amazonaws.com'
     
     def __init__(self, bucket_name: str):
-        super().__init__(self.SERVICE_NAME)
+        client_kwargs = {'endpoint_url': self.ENDPOINT_URL}
+        super().__init__(self.SERVICE_NAME, client_kwargs)
         self.bucket = bucket_name
         self.create_or_set_bucket()
 
-    def create_or_set_buckets(self):
+    def create_or_set_bucket(self):
         response = self.client.list_buckets()
 
         existing_buckets = [bucket['Name'] for bucket in response['Buckets']]
