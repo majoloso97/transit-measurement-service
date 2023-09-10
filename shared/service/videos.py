@@ -2,31 +2,47 @@ from uuid import uuid4
 from settings import settings
 from shared.database.crud import CRUDManager
 from shared.database.models import Video, Measurement, Detection
-from shared.schemas.videos import VideoSchema, NewVideo, UpdateVideo
+from shared.schemas.videos import (VideoSchema,
+                                   NewVideo,
+                                   UpdateVideoAPI,
+                                   UpdateVideoInternal)
 from shared.schemas.measurements import (MeasurementSchema,
                                          NewMeasurement,
-                                         UpdateMeasurement,
+                                         UpdateMeasurementAPI,
+                                         UpdateMeasurementInternal,
                                          DetectionSchema)
 from shared.aws.factory import AWSServiceFactory
 
 
 class VideoManager:
-    def __init__(self) -> None:
+    def __init__(self, usage: str = 'external') -> None:
         s3_config = {'bucket_name': settings.AWS_BUCKET_NAME}
         self.s3 = AWSServiceFactory.get_service(service='s3',
                                                 config=s3_config)
+        update_classes = {
+            'video': {
+                'internal': UpdateVideoInternal,
+                'external': UpdateVideoAPI
+            },
+            'measurement': {
+                'internal': UpdateMeasurementInternal,
+                'external': UpdateMeasurementAPI
+            }
+        }
+        video_cls = update_classes['video'][usage]
+        measurement_cls = update_classes['measurement'][usage]
         self.crud_video = CRUDManager(db_model=Video,
-                                      pydantic_create=NewVideo,
-                                      pydantic_update=UpdateVideo,
-                                      pydantic_response=VideoSchema)
+                                    pydantic_create=NewVideo,
+                                    pydantic_update=video_cls,
+                                    pydantic_response=VideoSchema)
         self.crud_measurement = CRUDManager(db_model=Measurement,
                                             pydantic_create=NewMeasurement,
-                                            pydantic_update=UpdateMeasurement,
+                                            pydantic_update=measurement_cls,
                                             pydantic_response=MeasurementSchema)
         self.crud_detection = CRUDManager(db_model=Detection,
-                                          pydantic_create=DetectionSchema,
-                                          pydantic_update=DetectionSchema,
-                                          pydantic_response=DetectionSchema)
+                                        pydantic_create=DetectionSchema,
+                                        pydantic_update=DetectionSchema,
+                                        pydantic_response=DetectionSchema)
 
     def create_video(self, user_id: int, video: NewVideo) -> VideoSchema:
         video.owner_id = user_id
@@ -66,8 +82,9 @@ class VideoManager:
                                                     item_create=detection)
         return saved
     
-    def user_update_video(self, video_id: int,
-                          params: UpdateVideo) -> VideoSchema:
+    def update_video(self, video_id: int,
+                     params: UpdateVideoAPI | UpdateVideoInternal
+                     ) -> VideoSchema:
         with self.crud_video.db.get_session() as session:
             updated = self.crud_video.update_item(session=session,
                                                   item_id=video_id,
@@ -75,12 +92,12 @@ class VideoManager:
         return updated
     
     def remove_video(self, video_id: int) -> VideoSchema:
-        params = UpdateVideo(is_active=False)
-        return self.user_update_video(video_id, params)
+        params = UpdateVideoAPI(is_active=False)
+        return self.update_video(video_id, params)
     
-    def user_update_measurement(self, measurement_id: int,
-                                params: UpdateMeasurement
-                                ) -> MeasurementSchema:
+    def update_measurement(self, measurement_id: int,
+                           params: UpdateMeasurementAPI | UpdateMeasurementInternal
+                           ) -> MeasurementSchema:
         with self.crud_measurement.db.get_session() as session:
             updated = self.crud_measurement.update_item(session=session,
                                                         item_id=measurement_id,
@@ -88,8 +105,8 @@ class VideoManager:
         return updated
 
     def remove_measurement(self, measurement_id: int) -> MeasurementSchema:
-        params = UpdateMeasurement(is_active=False)
-        return self.user_update_measurement(measurement_id, params)
+        params = UpdateMeasurementAPI(is_active=False)
+        return self.update_measurement(measurement_id, params)
 
     def get_video(self, video_id: int):
         with self.crud_video.db.get_session() as session:

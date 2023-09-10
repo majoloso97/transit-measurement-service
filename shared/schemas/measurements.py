@@ -17,6 +17,7 @@ class DetectionSchema(BaseModel):
 class BaseMeasurement(BaseModel):
     id: int = None
     video_id: int = None
+    is_active: bool = True
 
 
 class MeasurementSchema(BaseMeasurement):
@@ -39,12 +40,6 @@ class MeasurementSchema(BaseMeasurement):
     detections: list[DetectionSchema] | None = None
 
 
-class UpdateMeasurement(BaseMeasurement):
-    name: str = None
-    is_active: bool = None
-    status: str = None
-
-
 class NewMeasurement(BaseMeasurement):
     video_id: int = None
     name: str = str(uuid4())
@@ -54,3 +49,17 @@ class NewMeasurement(BaseMeasurement):
     x2: float = None
     y2: float = None
     status: str = 'CREATED'
+
+
+class UpdateMeasurementAPI(BaseMeasurement):
+    name: str = None
+    is_active: bool = None
+    status: str = None
+
+
+class UpdateMeasurementInternal(BaseMeasurement):
+    status: str = None
+    output_s3_key: str = None
+    output_video_url: str = None
+    detections_count: int = None
+    global_frequency: float = None

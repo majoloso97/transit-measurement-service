@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from api.dependencies.auth import get_current_active_user
 from api.errors import raise_http_exception
-from shared.schemas.videos import VideoSchema, NewVideo, UpdateVideo
+from shared.schemas.videos import VideoSchema, NewVideo, UpdateVideoAPI
 from shared.schemas.measurements import (MeasurementSchema,
                                          NewMeasurement,
-                                         UpdateMeasurement)
+                                         UpdateMeasurementAPI)
 from shared.schemas.users import UserSchema
 from shared.service.videos import VideoManager
 
@@ -30,10 +30,10 @@ def get_video(id: int,
 
 @router.patch('/{id}/', response_model=VideoSchema)
 def modify_video(id: int,
-                params: UpdateVideo,
+                params: UpdateVideoAPI,
                 current_user: UserSchema =
                 Depends(get_current_active_user)) -> VideoSchema:
-    return video_manager.user_update_video(video_id=id,
+    return video_manager.update_video(video_id=id,
                                            params=params)
 
 
@@ -70,12 +70,12 @@ def get_video(video_id: int,
               response_model=MeasurementSchema)
 def modify_video(video_id: int,
                  id: int,
-                 params: UpdateMeasurement,
+                 params: UpdateMeasurementAPI,
                  current_user: UserSchema =
                  Depends(get_current_active_user)) -> MeasurementSchema:
     measurement = video_manager.get_measurement(measurement_id=id)
     if measurement.video_id == video_id:
-        return video_manager.user_update_measurement(measurement_id=id,
+        return video_manager.update_measurement(measurement_id=id,
                                                      params=params)
     raise_http_exception(404, f'Measurement not found for video {video_id}')
 

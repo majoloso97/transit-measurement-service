@@ -29,7 +29,7 @@ class VideoSchema(BaseVideo):
     total_frames: Optional[int] = None
     duration: Optional[int] = None
     optimized_fps_ratio: Optional[float] = None
-    optimized_s3_key: Optional[float] = None
+    optimized_s3_key: Optional[str] = None
     optimized_video_url: Optional[str] = None
     measurements: list[MeasurementSchema] | None = None
 
@@ -41,19 +41,21 @@ class NewVideo(BaseVideo):
     status: str = 'CREATED'
 
 
-class UpdateVideo(BaseVideo):
+class UpdateVideoAPI(BaseVideo):
     name: str = None
     is_active: bool = None
     status: str = None
 
 
-class UpdateVideoMetadata(BaseVideo):
+class UpdateVideoInternal(BaseVideo):
+    status: str = None
     width: int = None
     height: int = None
     fps: int = None
     total_frames: int = None
     duration: int = None
-    status: str = 'IN PROGRESS'
+    optimized_fps_ratio: float = None
+    optimized_s3_key: str = None
 
 
 class FrameDetection(BaseModel):
