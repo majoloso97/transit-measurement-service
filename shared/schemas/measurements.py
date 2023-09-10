@@ -33,6 +33,7 @@ class MeasurementSchema(BaseMeasurement):
     y1: Optional[float] = None
     x2: Optional[float] = None
     y2: Optional[float] = None
+    upload_url: Optional[str] = None
     output_s3_key: Optional[str] = None
     output_video_url: Optional[str] = None
     detections_count: Optional[int] = None
