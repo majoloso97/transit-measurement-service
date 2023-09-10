@@ -55,7 +55,7 @@ class VideoManager:
                                                  key=saved.input_s3_key)
             saved.upload_url = url
 
-        saved = self.inject_video_urls(saved)
+        saved = self.inject_urls(saved)
         return saved
     
     def create_measurement(self, video_id: int,
@@ -89,6 +89,7 @@ class VideoManager:
             updated = self.crud_video.update_item(session=session,
                                                   item_id=video_id,
                                                   params=params)
+        updated = self.inject_urls(updated)
         return updated
     
     def remove_video(self, video_id: int) -> VideoSchema:
@@ -102,6 +103,7 @@ class VideoManager:
             updated = self.crud_measurement.update_item(session=session,
                                                         item_id=measurement_id,
                                                         params=params)
+        updated = self.inject_urls(updated)
         return updated
 
     def remove_measurement(self, measurement_id: int) -> MeasurementSchema:
@@ -112,6 +114,7 @@ class VideoManager:
         with self.crud_video.db.get_session() as session:
             video = self.crud_video.get_item(session=session,
                                              item_id=video_id)
+        video = self.inject_urls(video)
         return video
 
     def get_measurement(self, measurement_id: int):
@@ -119,6 +122,7 @@ class VideoManager:
             measurement = self.crud_measurement.get_item(
                 session=session,
                 item_id=measurement_id)
+        measurement = self.inject_urls(measurement)
         return measurement
 
     def generate_video_key(self, stage: str):
@@ -126,7 +130,7 @@ class VideoManager:
         key = f'videos/{stage}/{id}.mp4'
         return key
     
-    def inject_video_urls(self, instance):
+    def inject_urls(self, instance):
         if getattr(instance, 'input_s3_key', None):
             url = self.s3.generate_presigned_url(operation='get',
                                                  key=instance.input_s3_key)
