@@ -88,7 +88,7 @@ class VideoManager:
         with self.crud_video.db.get_session() as session:
             updated = self.crud_video.update_item(session=session,
                                                   item_id=video_id,
-                                                  params=params)
+                                                  item_update=params)
         updated = self.inject_urls(updated)
         return updated
     
@@ -102,7 +102,7 @@ class VideoManager:
         with self.crud_measurement.db.get_session() as session:
             updated = self.crud_measurement.update_item(session=session,
                                                         item_id=measurement_id,
-                                                        params=params)
+                                                        item_update=params)
         updated = self.inject_urls(updated)
         return updated
 
