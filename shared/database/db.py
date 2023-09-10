@@ -37,9 +37,8 @@ class DBService:
     @contextmanager
     def get_session(self):
         if self.is_active and self.Session:
-            session = self.Session()
             try:
-                with session.begin():
+                with self.Session() as session:
                     yield session
             finally:
                 session.close()

@@ -40,7 +40,7 @@ def get_current_active_user(payload:
             headers={"WWW-Authenticate": "Bearer"})
     token_data = TokenData(user_id=id)
 
-    user = users.crud.get_item(item_id=token_data.user_id)
+    user = users.get_user(by='id', item_id=token_data.user_id)
     if user is None:
         raise_http_exception(401,
                              "Could not validate credentials",
