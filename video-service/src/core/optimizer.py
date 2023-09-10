@@ -1,44 +1,42 @@
 import os
 import logging
+import requests
 import cv2
 from supervision.utils.video import VideoInfo, VideoSink
-from shared.database.crud import CRUDManager
-from shared.database.models import Video
+from settings import settings
+from shared.service.videos import VideoManager
 from shared.schemas.videos import (VideoSchema,
-                                   NewVideo,
-                                   UpdateVideoMetadata)
+                                   UpdateVideoInternal)
 
-MAX_FPS = 15
-MAX_BASE_DIMENSION = 360
+MAX_FPS = settings.MAX_FPS
+MAX_BASE_DIMENSION = settings.MAX_BASE_DIMENSION
 logger = logging.getLogger(__name__)
 
 
 class VideoOptimizer:
     def __init__(self, video_id: int) -> None:
-        self.crud = CRUDManager(db_model=Video,
-                                pydantic_create=NewVideo,
-                                pydantic_update=UpdateVideoMetadata,
-                                pydantic_response=VideoSchema)
+        self.manager = VideoManager('internal')
         if not isinstance(video_id, int):
             raise TypeError('Video ID should be integer')
         
-        self.video: VideoSchema = self.crud.get_item(video_id)
-        is_valid = self._validate_video_path(self.video.path)
+        self.video: VideoSchema = self.manager.get_video(video_id)
+        is_valid = self._validate_video_path(self.video.input_video_url)
         if not is_valid:
             raise ValueError('Video path is not valid')
         
-        self.save_metadata(self.video.path)
+        self.save_metadata(self.video.input_video_url)
 
     def save_metadata(self, video_path):
         metadata = self.get_video_metadata(video_path)
-        self.video = self.crud.update_item(item_id=self.video.id,
-                                           item_update=metadata)
+        self.video = self.manager.update_video(video_id=self.video.id,
+                                               params=metadata)
     
     def get_video_metadata(self, video_path):
         try:
             info = VideoInfo.from_video_path(video_path)
             duration = int(info.total_frames/info.fps)
-            metadata = UpdateVideoMetadata(width=info.width,
+            metadata = UpdateVideoInternal(status='OPTIMIZING',
+                                           width=info.width,
                                            height=info.height,
                                            fps=info.fps,
                                            total_frames=info.total_frames,
@@ -51,8 +49,9 @@ class VideoOptimizer:
         if not isinstance(video_path, str):
             raise TypeError('Video path should be a string')
 
-        is_valid_in_filesystem = os.path.isfile(video_path)
-        if not is_valid_in_filesystem:
+        s3_prefix = 'https://s3.amazonaws.com/transit-ventures-test/videos'
+        is_s3_url = video_path.startswith(s3_prefix)
+        if not is_s3_url:
             raise ValueError('Returned string is not a valid path')
 
         return True
@@ -62,10 +61,24 @@ class VideoOptimizer:
                                height=self.video.height,
                                fps=self.video.fps,
                                total_frames=self.video.total_frames)
-        target_path = f'{self.video.path[:-4]}_optimized.mp4'
-        processor, args = self.get_processor_and_args(video_info)
+        target_s3_key = self.manager.generate_video_key('optimized')
+        target_path = f'app/src/core/temp/{target_s3_key}'
+        processor, kwargs = self.get_processor_and_args(video_info)
+        logger.warning(self.video.input_video_url)
         if processor:
-            processor(target_path, *args)
+            processor(target_path, **kwargs)
+        # Save new metadata after preprocessing
+        fps_factor = kwargs.get('fps_factor', None)
+        added_metadata = UpdateVideoInternal(optimized_s3_key=target_s3_key,
+                                             optimized_fps_ratio=fps_factor)
+        self.video = self.manager.update_video(video_id=self.video.id,
+                                               params=added_metadata,
+                                               add_upload_url=True,
+                                               key_from='optimized_s3_key')
+        # Upload to presigned url
+        with open(target_path, 'r') as object_file:
+            object_text = object_file.read()
+        response = requests.put(self.video.upload_url, data=object_text)
 
     def get_processor_and_args(self, video_info: VideoInfo):
         dimensions = (video_info.width, video_info.height)
@@ -82,9 +95,12 @@ class VideoOptimizer:
                                        height=new_dimensions[1],
                                        fps=MAX_FPS,
                                        total_frames=self.video.total_frames)
-            return self.trim_video_fps_and_rescale, (new_video_info,
-                                                     new_dimensions,
-                                                     fps_factor)
+            kwargs = {
+                'video_info': new_video_info,
+                'target_dimensions': new_dimensions,
+                'fps_factor': fps_factor,
+            }
+            return self.trim_video_fps_and_rescale, kwargs
 
         if is_bigger:
             new_dimensions = self.get_target_dimensions(dimensions,
@@ -93,7 +109,11 @@ class VideoOptimizer:
                                        height=new_dimensions[1],
                                        fps=self.video.fps,
                                        total_frames=self.video.total_frames)
-            return self.rescale_video, (new_video_info, new_dimensions,)
+            kwargs = {
+                'video_info': new_video_info,
+                'target_dimensions': new_dimensions,
+            }
+            return self.rescale_video, kwargs
 
         if higher_fps:
             fps_factor = MAX_FPS / self.video.fps
@@ -101,8 +121,11 @@ class VideoOptimizer:
                                        height=self.video.height,
                                        fps=MAX_FPS,
                                        total_frames=self.video.total_frames)
-            return self.trim_video_fps, (new_video_info,
-                                         fps_factor,)
+            kwargs = {
+                'video_info': new_video_info,
+                'fps_factor': fps_factor,
+            }
+            return self.trim_video_fps, kwargs
 
         return None
     
@@ -114,7 +137,7 @@ class VideoOptimizer:
 
     def trim_video_fps(self, target_path, video_info, fps_factor):
         with VideoSink(target_path, video_info) as sink:
-            vidcap = cv2.VideoCapture(self.video.path)
+            vidcap = cv2.VideoCapture(self.video.input_video_url)
             assert vidcap.isOpened()
             index_in = -1
             index_out = -1
@@ -132,7 +155,7 @@ class VideoOptimizer:
                     sink.write_frame(frame)
 
     def rescale_video(self, target_path, video_info, target_dimensions):
-        vidcap = cv2.VideoCapture(self.video.path)
+        vidcap = cv2.VideoCapture(self.video.input_video_url)
         count = 0
         success = True
         with VideoSink(target_path, video_info) as sink:
@@ -149,7 +172,7 @@ class VideoOptimizer:
                                    target_dimensions,
                                    fps_factor):
         with VideoSink(target_path, video_info) as sink:
-            vidcap = cv2.VideoCapture(self.video.path)
+            vidcap = cv2.VideoCapture(self.video.input_video_url)
             assert vidcap.isOpened()
             index_in = -1
             index_out = -1
