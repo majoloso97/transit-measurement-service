@@ -28,43 +28,39 @@ class S3Service(BaseAWSService):
             self.client.create_bucket(Bucket=self.bucket)
 
     def generate_presigned_url(self,
-                               object_key: str,
+                               operation: str,
+                               key: str = None,
                                content_type: str = 'video/mp4',
                                expiration: int = 3600) -> str:
-        allowed_content_types = ['video/mp4']
+        operation += '_object' 
+        params = {}
+        if operation == 'put_object':
+            allowed_content_types = ['video/mp4']
+
+            if content_type not in allowed_content_types:
+                raise ValueError("Unsupported content type")
+            params = {
+                'Bucket': self.bucket,
+                'Key': key,
+                'ContentType': content_type
+            }
         
-        if content_type not in allowed_content_types:
-            raise ValueError("Unsupported content type")
-        
+        if operation == 'get_object':
+            params = {
+                'Bucket': self.bucket,
+                'Key': key
+            }
+
         try:
             url = self.client.generate_presigned_url(
-                'put_object',
-                Params={
-                    'Bucket': self.bucket,
-                    'Key': object_key,
-                    'ContentType': content_type
-                },
+                operation,
+                Params=params,
                 ExpiresIn=expiration
             )
             return url
         except ClientError as e:
             logger.exception(f"Error generating presigned URL: {e}")
             return ""
-
-    def get_presigned_url(self,
-                          object_key: str,
-                          expiration: int = 3600) -> str:
-        try:
-            url = self.client.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': self.bucket,
-                        'Key': object_key},
-                ExpiresIn=expiration
-            )
-            return url
-        except ClientError as e:
-            logger.exception(f"Error generating presigned URL: {e}")
-            return ''
 
     def remove_file(self, key: str):
         self.client.delete_object(Bucket=self.bucket, Key=key)
