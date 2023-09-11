@@ -19,7 +19,7 @@ class VideoOptimizer:
             raise TypeError('Video ID should be integer')
         
         self.video: VideoSchema = self.manager.get_video(video_id)
-        is_valid = self._validate_video_path(self.video.input_video_url)
+        is_valid = self.manager.s3.validate_s3_video_path(self.video.input_video_url)
         if not is_valid:
             raise ValueError('Video path is not valid')
         
@@ -43,17 +43,6 @@ class VideoOptimizer:
             return metadata
         except:
             raise RuntimeError('Video metadata could not be extracted')
-
-    def _validate_video_path(self, video_path: str) -> bool:
-        if not isinstance(video_path, str):
-            raise TypeError('Video path should be a string')
-
-        s3_prefix = 'https://s3.amazonaws.com/transit-ventures-test/videos'
-        is_s3_url = video_path.startswith(s3_prefix)
-        if not is_s3_url:
-            raise ValueError('Returned string is not a valid path')
-
-        return True
     
     def optimize(self):
         video_info = VideoInfo(width=self.video.width,

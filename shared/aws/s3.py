@@ -27,6 +27,17 @@ class S3Service(BaseAWSService):
         if self.bucket not in existing_buckets:
             self.client.create_bucket(Bucket=self.bucket)
 
+    def validate_s3_video_path(self, video_path: str) -> bool:
+        if not isinstance(video_path, str):
+            raise TypeError('Video path should be a string')
+
+        s3_prefix = f'https://s3.amazonaws.com/{self.bucket}/videos'
+        is_s3_url = video_path.startswith(s3_prefix)
+        if not is_s3_url:
+            raise ValueError('Returned string is not a valid path')
+
+        return True
+
     def generate_presigned_url(self,
                                operation: str,
                                key: str = None,
