@@ -65,16 +65,16 @@ class VideoOptimizer:
         # Use ffmpeg to change codecs
         os.system(f"ffmpeg -y -i {_target_path} -vcodec libx264 -f mp4 {target_path}")
         fps_factor = kwargs.get('fps_factor', 1)
-        added_metadata = UpdateVideoInternal(optimized_s3_key=target_s3_key,
+        self.manager.s3.upload_video_file(target_path, target_s3_key)
+        os.remove(target_path)
+        os.remove(_target_path)
+        added_metadata = UpdateVideoInternal(status='OPTIMIZED',
+                                             optimized_s3_key=target_s3_key,
                                              optimized_fps_ratio=fps_factor)
         self.video = self.manager.update_video(video_id=self.video.id,
                                                params=added_metadata,
                                                add_upload_url=True,
                                                key_from='optimized_s3_key')
-        self.manager.s3.upload_video_file(target_path, target_s3_key)
-        os.remove(target_path)
-        os.remove(_target_path)
-
 
     def get_processor_and_args(self, video_info: VideoInfo):
         dimensions = (video_info.width, video_info.height)
