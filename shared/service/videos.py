@@ -1,4 +1,3 @@
-import requests
 from uuid import uuid4
 from settings import settings
 from shared.database.crud import CRUDManager
