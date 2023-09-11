@@ -162,12 +162,3 @@ class VideoManager:
             instance.output_video_url = url
 
         return instance
-    
-    def upload_video_to_s3(self, url, video_path):
-        headers = {'Content-type':'video/mp4'}
-        file = open(video_path, 'rb')
-        response = requests.put(url,
-                                headers=headers,
-                                data=file)
-        if not response.status_code == 200:
-            raise RuntimeError('Video not uploaded')
