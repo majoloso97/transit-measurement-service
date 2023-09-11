@@ -61,6 +61,15 @@ class S3Service(BaseAWSService):
         except ClientError as e:
             logger.exception(f"Error generating presigned URL: {e}")
             return ""
+    
+    def upload_video_file(self,
+                          filename: str,
+                          s3_key: str):
+        with open(filename, 'rb') as data:
+            self.client.upload_fileobj(data,
+                                       self.bucket,
+                                       s3_key,
+                                ExtraArgs={'ContentType': 'video/mp4'})
 
     def remove_file(self, key: str):
         self.client.delete_object(Bucket=self.bucket, Key=key)
