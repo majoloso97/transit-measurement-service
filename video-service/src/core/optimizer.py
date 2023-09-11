@@ -1,6 +1,5 @@
 import os
 import logging
-import requests
 import cv2
 from supervision.utils.video import VideoInfo, VideoSink
 from settings import settings
@@ -62,23 +61,31 @@ class VideoOptimizer:
                                fps=self.video.fps,
                                total_frames=self.video.total_frames)
         target_s3_key = self.manager.generate_video_key('optimized')
-        target_path = f'app/src/core/temp/{target_s3_key}'
+        local_filename = target_s3_key.split("/")[-1]
+        # _target_path is raw mp4, target_path is the file for web codec 
+        _target_path = f'/app/src/core/assets/_{local_filename}'
+        target_path = f'/app/src/core/assets/{local_filename}'
+        
         processor, kwargs = self.get_processor_and_args(video_info)
-        logger.warning(self.video.input_video_url)
-        if processor:
-            processor(target_path, **kwargs)
-        # Save new metadata after preprocessing
-        fps_factor = kwargs.get('fps_factor', None)
+        processor(_target_path, **kwargs)
+
+        is_valid_in_filesystem = os.path.isfile(_target_path)
+        if not is_valid_in_filesystem:
+            raise ValueError('Target path is not a valid path')
+
+        # Use ffmpeg to change codecs
+        os.system(f"ffmpeg -y -i {_target_path} -vcodec libx264 -f mp4 {target_path}")
+        fps_factor = kwargs.get('fps_factor', 1)
         added_metadata = UpdateVideoInternal(optimized_s3_key=target_s3_key,
                                              optimized_fps_ratio=fps_factor)
         self.video = self.manager.update_video(video_id=self.video.id,
                                                params=added_metadata,
                                                add_upload_url=True,
                                                key_from='optimized_s3_key')
-        # Upload to presigned url
-        with open(target_path, 'r') as object_file:
-            object_text = object_file.read()
-        response = requests.put(self.video.upload_url, data=object_text)
+        self.manager.s3.upload_video_file(target_path, target_s3_key)
+        os.remove(target_path)
+        os.remove(_target_path)
+
 
     def get_processor_and_args(self, video_info: VideoInfo):
         dimensions = (video_info.width, video_info.height)
@@ -127,13 +134,27 @@ class VideoOptimizer:
             }
             return self.trim_video_fps, kwargs
 
-        return None
+        kwargs = {
+                'video_info': video_info,
+            }
+        return self.copy_video, kwargs
     
     def get_target_dimensions(self, video_dimensions, min_side):
         crop_factor = MAX_BASE_DIMENSION/min_side
         new_width = int(video_dimensions[0]*crop_factor)
         new_height = int(video_dimensions[1]*crop_factor)
         return new_width, new_height
+    
+    def copy_video(self, target_path, video_info):
+        vidcap = cv2.VideoCapture(self.video.input_video_url)
+        count = 0
+        success = True
+        with VideoSink(target_path, video_info) as sink:
+            while success:
+                success, frame = vidcap.read()
+                if not success: break
+                sink.write_frame(frame)
+                count += 1
 
     def trim_video_fps(self, target_path, video_info, fps_factor):
         with VideoSink(target_path, video_info) as sink:
