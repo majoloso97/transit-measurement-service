@@ -17,19 +17,19 @@ class VideoOptimizer:
         self.manager = VideoManager('internal')
         if not isinstance(video_id, int):
             raise TypeError('Video ID should be integer')
-        
+
         self.video: VideoSchema = self.manager.get_video(video_id)
         is_valid = self.manager.s3.validate_s3_video_path(self.video.input_video_url)
         if not is_valid:
             raise ValueError('Video path is not valid')
-        
+
         self.save_metadata(self.video.input_video_url)
 
     def save_metadata(self, video_path):
         metadata = self.get_video_metadata(video_path)
         self.video = self.manager.update_video(video_id=self.video.id,
                                                params=metadata)
-    
+
     def get_video_metadata(self, video_path):
         try:
             info = VideoInfo.from_video_path(video_path)
@@ -43,7 +43,7 @@ class VideoOptimizer:
             return metadata
         except:
             raise RuntimeError('Video metadata could not be extracted')
-    
+
     def optimize(self):
         video_info = VideoInfo(width=self.video.width,
                                height=self.video.height,
@@ -54,7 +54,7 @@ class VideoOptimizer:
         # _target_path is raw mp4, target_path is the file for web codec 
         _target_path = f'/app/src/core/assets/_{local_filename}'
         target_path = f'/app/src/core/assets/{local_filename}'
-        
+
         processor, kwargs = self.get_processor_and_args(video_info)
         processor(_target_path, **kwargs)
 
@@ -127,13 +127,13 @@ class VideoOptimizer:
                 'video_info': video_info,
             }
         return self.copy_video, kwargs
-    
+
     def get_target_dimensions(self, video_dimensions, min_side):
         crop_factor = MAX_BASE_DIMENSION/min_side
         new_width = int(video_dimensions[0]*crop_factor)
         new_height = int(video_dimensions[1]*crop_factor)
         return new_width, new_height
-    
+
     def copy_video(self, target_path, video_info):
         vidcap = cv2.VideoCapture(self.video.input_video_url)
         count = 0
