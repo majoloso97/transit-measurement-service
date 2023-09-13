@@ -115,6 +115,8 @@ class VideoManager:
             video = self.crud_video.get_item(session=session,
                                              item_id=video_id)
         video = self.inject_urls(video)
+        video.measurements = [self.inject_urls(m) 
+                              for m in video.measurements]
         return video
 
     def get_measurement(self, measurement_id: int):
