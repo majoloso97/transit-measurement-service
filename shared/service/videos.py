@@ -83,19 +83,12 @@ class VideoManager:
         return saved
     
     def update_video(self, video_id: int,
-                     params: UpdateVideoAPI | UpdateVideoInternal,
-                     add_upload_url: bool = False,
-                     key_from: str = None
+                     params: UpdateVideoAPI | UpdateVideoInternal
                      ) -> VideoSchema:
         with self.crud_video.db.get_session() as session:
             updated = self.crud_video.update_item(session=session,
                                                   item_id=video_id,
                                                   item_update=params)
-        if add_upload_url:
-            key = getattr(updated, key_from, None)
-            url = self.s3.generate_presigned_url(operation='put',
-                                                 key=key)
-            updated.upload_url = url
         updated = self.inject_urls(updated)
         return updated
     
@@ -104,19 +97,12 @@ class VideoManager:
         return self.update_video(video_id, params)
     
     def update_measurement(self, measurement_id: int,
-                           params: UpdateMeasurementAPI | UpdateMeasurementInternal,
-                           add_upload_url: bool = False,
-                           key_from: str = None
+                           params: UpdateMeasurementAPI | UpdateMeasurementInternal
                            ) -> MeasurementSchema:
         with self.crud_measurement.db.get_session() as session:
             updated = self.crud_measurement.update_item(session=session,
                                                         item_id=measurement_id,
                                                         item_update=params)
-        if add_upload_url:
-            key = getattr(updated, key_from, None)
-            url = self.s3.generate_presigned_url(operation='put',
-                                                 key=key)
-            updated.upload_url = url
         updated = self.inject_urls(updated)
         return updated
 
