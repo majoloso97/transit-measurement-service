@@ -75,6 +75,6 @@ class Detection(Base):
     measurement_id = Column(Integer, ForeignKey("measurements.id"))
     class_name = Column(String(30))
     count = Column(Integer)
-    frequency = Column(Integer)
+    frequency = Column(Float)
 
     measurement = relationship("Measurement", back_populates="detections")
