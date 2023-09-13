@@ -72,9 +72,7 @@ class VideoOptimizer:
                                              optimized_s3_key=target_s3_key,
                                              optimized_fps_ratio=fps_factor)
         self.video = self.manager.update_video(video_id=self.video.id,
-                                               params=added_metadata,
-                                               add_upload_url=True,
-                                               key_from='optimized_s3_key')
+                                               params=added_metadata)
 
     def get_processor_and_args(self, video_info: VideoInfo):
         dimensions = (video_info.width, video_info.height)
