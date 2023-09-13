@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class VideoPredictor:
     ALLOWED_CLASS_ID = [1, 2, 3, 5, 7]
-    CONFIDENCE_THRESHOLD = 0.6
+    CONFIDENCE_THRESHOLD = 0
 
     def __init__(self, measurement_id: int) -> None:
         self.manager = VideoManager('internal')
@@ -94,23 +94,27 @@ class VideoPredictor:
 
     def generate_predicted_video(self, target_path):
         with VideoSink(target_path, self.video_info) as sink:
-            # for result in model.track(source=self.video_url, stream=True):
-            for result in model.track(source='/app/src/core/assets/vid2_optimized.mp4', stream=True):
-                frame = result.orig_img
-                detections = self.process_frame_detections(result)
-                labels = self.get_frame_labels(detections)
+            for result in model.track(source=self.video_url,
+            # for result in model.track(source='/app/src/core/assets/vid2_optimized.mp4',
+                                      stream=True):
+                try:
+                    frame = result.orig_img
+                    detections = self.process_frame_detections(result)
+                    labels = self.get_frame_labels(detections)
 
-                frame = self.box_annotator.annotate(
-                    scene=frame, 
-                    detections=detections,
-                    labels=labels
-                )
-                self.count_and_annotate_class_detections(frame, detections)
-                counter, annotator = self.global_annotator
-                counter.trigger(detections=detections)
-                annotator.annotate(frame=frame, line_counter=counter)
-                # TODO: Update progress to queue
-                sink.write_frame(frame)
+                    frame = self.box_annotator.annotate(
+                        scene=frame, 
+                        detections=detections,
+                        labels=labels
+                    )
+                    self.count_and_annotate_class_detections(frame, detections)
+                    counter, annotator = self.global_annotator
+                    counter.trigger(detections=detections)
+                    annotator.annotate(frame=frame, line_counter=counter)
+                    # TODO: Update progress to queue
+                    sink.write_frame(frame)
+                except Exception:
+                    continue
         
     def save_result_statistics(self, output_s3_key):
         global_count = 0
