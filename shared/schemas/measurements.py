@@ -7,8 +7,8 @@ from pydantic import BaseModel, ConfigDict
 class DetectionSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: Optional[int]
-    measurement_id: Optional[int]
+    id: int = None
+    measurement_id: int = None
     class_name: Optional[str]
     count: Optional[int]
     frequency: Optional[float]
