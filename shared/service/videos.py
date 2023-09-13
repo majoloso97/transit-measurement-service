@@ -67,7 +67,7 @@ class VideoManager:
         if not all(counter_coordinates):
             measurement.x1 = 0
             measurement.y1 = 0.5
-            measurement.x2 = 0
+            measurement.x2 = 1
             measurement.y2 = 0.5
         with self.crud_measurement.db.get_session() as session:
             saved = self.crud_measurement.create_item(session=session,
