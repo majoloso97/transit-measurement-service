@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import supervision as sv
 from supervision.utils.video import VideoInfo, VideoSink
+from settings import settings
 from core.model import model
 from shared.service.videos import VideoManager
 from shared.schemas.videos import VideoSchema
@@ -15,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class VideoPredictor:
-    ALLOWED_CLASS_ID = [1, 2, 3, 5, 7]
-    CONFIDENCE_THRESHOLD = 0
+    ALLOWED_CLASS_ID = settings.ALLOWED_CLASS_ID
+    CONFIDENCE_THRESHOLD = settings.CONFIDENCE_THRESHOLD
 
     def __init__(self, measurement_id: int) -> None:
         self.manager = VideoManager('internal')
