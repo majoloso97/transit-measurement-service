@@ -22,6 +22,14 @@ def create_video(video: NewVideo,
                                       video=video)
 
 
+@router.get('/', response_model=list[VideoSchema])
+def get_videos(current_user: UserSchema =
+               Depends(get_current_active_user)) -> list[VideoSchema]:
+    videos = video_manager.get_videos()
+    user_videos = filter(lambda x: x.owner_id == current_user.id, videos)
+    return list(user_videos)
+
+
 @router.get('/{id}/', response_model=VideoSchema)
 def get_video(id: int,
              current_user: UserSchema =
