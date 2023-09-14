@@ -77,8 +77,8 @@ class VideoPredictor:
         target_s3_key = self.manager.generate_video_key('output')
         local_filename = target_s3_key.split("/")[-1]
         # _target_path is raw mp4, target_path is the file for web codec 
-        _target_path = f'/app/src/core/assets/_{local_filename}'
-        target_path = f'/app/src/core/assets/{local_filename}'
+        _target_path = os.path.join(os.getcwd(), f'_{local_filename}')
+        target_path = os.path.join(os.getcwd(), local_filename)
 
         self.generate_predicted_video(_target_path)
 

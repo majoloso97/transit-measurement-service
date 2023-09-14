@@ -54,8 +54,8 @@ class VideoOptimizer:
         target_s3_key = self.manager.generate_video_key('optimized')
         local_filename = target_s3_key.split("/")[-1]
         # _target_path is raw mp4, target_path is the file for web codec 
-        _target_path = f'/app/src/core/assets/_{local_filename}'
-        target_path = f'/app/src/core/assets/{local_filename}'
+        _target_path = os.path.join(os.getcwd(), f'_{local_filename}')
+        target_path = os.path.join(os.getcwd(), local_filename)
 
         processor, kwargs = self.get_processor_and_args(video_info)
         processor(_target_path, **kwargs)
