@@ -37,3 +37,4 @@ class OptimizerOrchestrator(GenericOrchestrator):
                     params = UpdateMeasurementAPI(status='QUEUED')
                     self.manager.update_measurement(measurement.id,
                                                     params)
+                    q.lpush('MEASUREMENTS_TODO', measurement.id)
