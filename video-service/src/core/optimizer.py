@@ -7,12 +7,14 @@ from shared.service.videos import VideoManager
 from shared.schemas.videos import (VideoSchema,
                                    UpdateVideoInternal)
 
-MAX_FPS = settings.MAX_FPS
-MAX_BASE_DIMENSION = settings.MAX_BASE_DIMENSION
+
 logger = logging.getLogger(__name__)
 
 
 class VideoOptimizer:
+    MAX_FPS = settings.MAX_FPS
+    MAX_BASE_DIMENSION = settings.MAX_BASE_DIMENSION
+
     def __init__(self, video_id: int) -> None:
         self.manager = VideoManager('internal')
         if not isinstance(video_id, int):
@@ -78,16 +80,16 @@ class VideoOptimizer:
         dimensions = (video_info.width, video_info.height)
         min_side_size = min(dimensions)
         
-        is_bigger = min_side_size > MAX_BASE_DIMENSION
-        higher_fps = video_info.fps > MAX_FPS
+        is_bigger = min_side_size > self.MAX_BASE_DIMENSION
+        higher_fps = video_info.fps > self.MAX_FPS
         
         if is_bigger and higher_fps:
             new_dimensions = self.get_target_dimensions(dimensions,
                                                         min_side_size)
-            fps_factor = MAX_FPS / self.video.fps
+            fps_factor = self.MAX_FPS / self.video.fps
             new_video_info = VideoInfo(width=new_dimensions[0],
                                        height=new_dimensions[1],
-                                       fps=MAX_FPS,
+                                       fps=self.MAX_FPS,
                                        total_frames=self.video.total_frames)
             kwargs = {
                 'video_info': new_video_info,
@@ -110,10 +112,10 @@ class VideoOptimizer:
             return self.rescale_video, kwargs
 
         if higher_fps:
-            fps_factor = MAX_FPS / self.video.fps
+            fps_factor = self.MAX_FPS / self.video.fps
             new_video_info = VideoInfo(width=self.video.width,
                                        height=self.video.height,
-                                       fps=MAX_FPS,
+                                       fps=self.MAX_FPS,
                                        total_frames=self.video.total_frames)
             kwargs = {
                 'video_info': new_video_info,
@@ -127,7 +129,7 @@ class VideoOptimizer:
         return self.copy_video, kwargs
 
     def get_target_dimensions(self, video_dimensions, min_side):
-        crop_factor = MAX_BASE_DIMENSION/min_side
+        crop_factor = self.MAX_BASE_DIMENSION/min_side
         new_width = int(video_dimensions[0]*crop_factor)
         new_height = int(video_dimensions[1]*crop_factor)
         return new_width, new_height
