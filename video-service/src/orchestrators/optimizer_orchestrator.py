@@ -30,7 +30,7 @@ class OptimizerOrchestrator(GenericOrchestrator):
                 self.send_task_to_error('video')
 
     def enqueue_measurment_tasks(self, video_id: int):
-        video = self.manager.get_video()
+        video = self.manager.get_video(video_id)
         if video.measurements:
             for measurement in video.measurements:
                 if measurement.status == 'REQUESTED':
