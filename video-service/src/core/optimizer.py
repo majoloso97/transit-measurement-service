@@ -34,7 +34,7 @@ class VideoOptimizer:
         try:
             info = VideoInfo.from_video_path(video_path)
             duration = int(info.total_frames/info.fps)
-            metadata = UpdateVideoInternal(status='OPTIMIZING',
+            metadata = UpdateVideoInternal(status='PREPROCESSING',
                                            width=info.width,
                                            height=info.height,
                                            fps=info.fps,

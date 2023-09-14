@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from api.dependencies.auth import get_current_active_user
 from api.errors import raise_http_exception
+from shared.queue.queue import q
 from shared.schemas.videos import VideoSchema, NewVideo, UpdateVideoAPI
 from shared.schemas.measurements import (MeasurementSchema,
                                          NewMeasurement,
@@ -34,7 +35,17 @@ def modify_video(id: int,
                 current_user: UserSchema =
                 Depends(get_current_active_user)) -> VideoSchema:
     return video_manager.update_video(video_id=id,
-                                           params=params)
+                                      params=params)
+
+
+@router.patch('/{id}/confirm-upload/', response_model=VideoSchema)
+def modify_video(id: int,
+                 current_user: UserSchema =
+                Depends(get_current_active_user)) -> VideoSchema:
+    params = UpdateVideoAPI(status='QUEUED')
+    q.lpush('VIDEO_TODO', id)
+    return video_manager.update_video(video_id=id,
+                                      params=params)
 
 
 @router.delete('/{id}/', response_model=VideoSchema)
@@ -50,8 +61,15 @@ def create_measurement(video_id: int,
                        measurement: NewMeasurement,
                        current_user: UserSchema =
                        Depends(get_current_active_user)) -> MeasurementSchema:
-    return video_manager.create_measurement(video_id=video_id,
-                                            measurement=measurement)
+    video = video_manager.get_video(video_id)
+    requires_queuing = video.status == 'OPTIMIZED'
+    if requires_queuing:
+        measurement.status = 'QUEUED'
+    
+    measurement = video_manager.create_measurement(video_id=video_id,
+                                                   measurement=measurement)
+    if requires_queuing: q.lpush('MEASUREMENTS_TODO', measurement.id)
+    return measurement
 
 
 @router.get('/{video_id}/measurements/{id}/',

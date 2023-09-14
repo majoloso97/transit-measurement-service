@@ -49,7 +49,7 @@ class NewMeasurement(BaseMeasurement):
     y1: float = None
     x2: float = None
     y2: float = None
-    status: str = 'CREATED'
+    status: str = 'REQUESTED'
 
 
 class UpdateMeasurementAPI(BaseMeasurement):
