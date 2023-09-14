@@ -126,6 +126,15 @@ class VideoManager:
         video.measurements = [self.inject_urls(m) 
                               for m in video.measurements]
         return video
+    
+    def get_videos(self):
+        with self.crud_video.db.get_session() as session:
+            videos = self.crud_video.get_items(session=session)
+        for video in videos:
+            video = self.inject_urls(video)
+            video.measurements = [self.inject_urls(m) 
+                                  for m in video.measurements]
+        return videos
 
     def get_measurement(self, measurement_id: int):
         with self.crud_measurement.db.get_session() as session:
