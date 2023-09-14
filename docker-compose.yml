@@ -17,8 +17,13 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_KEY_ID=${AWS_KEY_ID}
       - AWS_SECRET=${AWS_SECRET}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
       - MODEL_NAME=${MODEL_NAME}
       - AUTO_RELOAD=${AUTO_RELOAD}
+      - MAX_FPS=${MAX_FPS}
+      - MAX_BASE_DIMENSION=${MAX_BASE_DIMENSION}
+      - ALLOWED_CLASS_ID=${ALLOWED_CLASS_ID}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD}
     build:
       context: .
       dockerfile: ./Dockerfile.video
@@ -47,6 +52,7 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_KEY_ID=${AWS_KEY_ID}
       - AWS_SECRET=${AWS_SECRET}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
       - AUTO_RELOAD=${AUTO_RELOAD}
       - SECRET_APP_KEY=${SECRET_APP_KEY}
       - TOKEN_EXPIRATION=${TOKEN_EXPIRATION}

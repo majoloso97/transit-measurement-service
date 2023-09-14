@@ -16,7 +16,7 @@ class UserManager:
                                 pydantic_response=UserSchema)
 
     def authenticate_user(self, username: str, password: str):
-        user = self.crud.get_item_by_field(username=username)
+        user = self.get_user(by='field', username=username)
         if user is None:
             return False
         if not self.hasher.verify_password(password, user.password):
@@ -36,31 +36,41 @@ class UserManager:
         return {"access_token": access_token, "token_type": "bearer"}
 
     def create_user(self, user: NewUser):
-        existing = self.crud.get_item_by_field(username=user.username)
+        existing = self.get_user(by='field', username=user.username)
         if existing:
             raise_http_exception(400,
                                  "User already exists")
         
         user.password = self.hasher.get_password_hash(user.password)
-        created_user = self.crud.create_item(user)
+        
+        with self.crud.db.get_session() as session:
+            created_user = self.crud.create_item(session=session,
+                                                 item_create=user)
+        
         access_token_kwargs = {"sub": str(created_user.id)}
         access_token = self.hasher.create_access_token(access_token_kwargs)
         return {"access_token": access_token, "token_type": "bearer"}
 
     def modify_user(self, user_id: int, params: ModifiedUser) -> User:
-        user = self.crud.get_item(item_id=user_id)
+        user = self.get_user(by='id', item_id=user_id)
         if not user:
             raise_http_exception(404,
                                  "User doesn't exist")
         if params.password:
             params.password = self.hasher.get_password_hash(params.password)
 
-        return self.crud.update_item(item_id=user.id,
-                                     item_update=params)
+        with self.crud.db.get_session() as session:
+            modified = self.crud.update_item(session=session,
+                                             item_id=user.id,
+                                             item_update=params)
+        return modified
 
-    def get_user(self, user_id: int) -> User:
-        user = self.crud.get_item(item_id=user_id)
-        if not user:
-            raise_http_exception(404,
-                                 "User doesn't exist")
+    def get_user(self, by: str, **kwargs) -> User:
+        methods = {
+            'id': self.crud.get_item,
+            'field': self.crud.get_item_by_field
+        }
+        retrieval_method = methods.get(by, None)
+        with self.crud.db.get_session() as session:
+            user = retrieval_method(session, **kwargs)
         return user

@@ -15,3 +15,4 @@ class SharedSettings(BaseSettings):
     AWS_REGION: str
     AWS_KEY_ID: str
     AWS_SECRET: str
+    AWS_BUCKET_NAME: str
