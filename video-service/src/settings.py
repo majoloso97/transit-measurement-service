@@ -7,6 +7,7 @@ class Settings(SharedSettings):
     MAX_BASE_DIMENSION: int = 360
     ALLOWED_CLASS_ID: list = [1, 2, 3, 5, 7]
     CONFIDENCE_THRESHOLD: float = 0
+    THREAD_ORCHESTRATOR_SLEEP_TIME: int = 0
 
 
 settings = Settings() 

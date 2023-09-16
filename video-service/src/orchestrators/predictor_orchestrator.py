@@ -1,4 +1,6 @@
+import time
 import logging
+from settings import settings
 from shared.queue.queue import q
 from orchestrators.generic_orchestrator import GenericOrchestrator
 from core.predictor import VideoPredictor
@@ -17,11 +19,15 @@ class PredictorOrchestrator(GenericOrchestrator):
 
     def process_task(self):
         measurement_id = self.get_next_task()
-        if measurement_id:
-            try:
-                predictor = VideoPredictor(measurement_id)
-                predictor.predict()
-                self.remove_complete_task()
-            except Exception as e:
-                logger.warning(e)
-                self.send_task_to_error('measurement')
+        if not measurement_id:
+            logger.info("No measurements in queue. Awaiting measurements.")
+            time.sleep(settings.THREAD_ORCHESTRATOR_SLEEP_TIME)
+            return
+        try:
+            logger.info(f"Predicting measurement ID {measurement_id}")
+            predictor = VideoPredictor(measurement_id)
+            predictor.predict()
+            self.remove_complete_task()
+        except Exception as e:
+            logger.warning(e)
+            self.send_task_to_error('measurement')
