@@ -24,6 +24,7 @@ services:
       - MAX_BASE_DIMENSION=${MAX_BASE_DIMENSION}
       - ALLOWED_CLASS_ID=${ALLOWED_CLASS_ID}
       - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD}
+      - THREAD_ORCHESTRATOR_SLEEP_TIME=${THREAD_ORCHESTRATOR_SLEEP_TIME}
     build:
       context: .
       dockerfile: ./Dockerfile.video
