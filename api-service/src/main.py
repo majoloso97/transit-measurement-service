@@ -1,6 +1,7 @@
 import logging
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from settings import settings
 from shared.log_config import setup_logger, get_uvicorn_log_config
 from api.events.start import start_handler
@@ -14,6 +15,19 @@ app = FastAPI(title="Service for video processing in transit measurment app",
                 model for ML operations.")
 
 app.add_event_handler('startup', start_handler(app))
+
+origins = [
+    "http://localhost",
+    "http://localhost:19006",
+    "*",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(welcome.router)
 app.include_router(users.router)
