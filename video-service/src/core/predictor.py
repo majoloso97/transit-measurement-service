@@ -154,7 +154,7 @@ class VideoPredictor:
 
     def get_frame_labels(self, detections):
         labels = [
-            f"{tracker_id} {model.model.names[class_id]} {confidence:0.2f}"
+            f"{model.model.names[class_id].title()} {confidence:0.2f}"
             for *_, confidence, class_id, tracker_id
             in detections
         ]
