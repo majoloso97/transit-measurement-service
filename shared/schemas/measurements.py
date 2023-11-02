@@ -45,10 +45,10 @@ class NewMeasurement(BaseMeasurement):
     video_id: int = None
     name: str = str(uuid4())
     output_s3_key: str = None
-    x1: float = None
-    y1: float = None
-    x2: float = None
-    y2: float = None
+    x1: float = -1.0
+    y1: float = -1.0
+    x2: float = -1.0
+    y2: float = -1.0
     status: str = 'REQUESTED'
 
 
