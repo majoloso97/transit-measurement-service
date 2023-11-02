@@ -27,7 +27,9 @@ def get_videos(current_user: UserSchema =
                Depends(get_current_active_user)) -> list[VideoSchema]:
     videos = video_manager.get_videos()
     user_videos = filter(lambda x: x.owner_id == current_user.id, videos)
-    return list(user_videos)
+    return sorted(list(user_videos),
+                  key=lambda m: m.created_at,
+                  reverse=True)
 
 
 @router.get('/{id}/', response_model=VideoSchema)
