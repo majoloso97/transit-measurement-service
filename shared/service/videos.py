@@ -66,9 +66,9 @@ class VideoManager:
         coordinate_cond = [all([isinstance(c, float), 0<=c<=1])
                            for c in get_coord(measurement)]
         if not all(coordinate_cond):
-            measurement.x1 = 0
+            measurement.x1 = 0.0
             measurement.y1 = 0.5
-            measurement.x2 = 1
+            measurement.x2 = 1.0
             measurement.y2 = 0.5
         with self.crud_measurement.db.get_session() as session:
             saved = self.crud_measurement.create_item(session=session,
