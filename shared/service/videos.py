@@ -116,8 +116,11 @@ class VideoManager:
             video = self.crud_video.get_item(session=session,
                                              item_id=video_id)
         video = self.inject_urls(video)
-        video.measurements = [self.inject_urls(m) 
-                              for m in video.measurements]
+        measurements = [self.inject_urls(m) 
+                        for m in video.measurements]
+        video.measurements = sorted(measurements,
+                                    key=lambda m: m.created_at,
+                                    reverse=True)
         return video
     
     def get_videos(self):
@@ -125,8 +128,11 @@ class VideoManager:
             videos = self.crud_video.get_items(session=session)
         for video in videos:
             video = self.inject_urls(video)
-            video.measurements = [self.inject_urls(m) 
-                                  for m in video.measurements]
+            measurements = [self.inject_urls(m) 
+                            for m in video.measurements]
+            video.measurements = sorted(measurements,
+                                        key=lambda m: m.created_at,
+                                        reverse=True)
         return videos
 
     def get_measurement(self, measurement_id: int):
