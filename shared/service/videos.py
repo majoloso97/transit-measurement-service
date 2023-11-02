@@ -63,19 +63,12 @@ class VideoManager:
         measurement.video_id = video_id
         measurement.output_s3_key = self.generate_video_key('predictions')
         get_coord = lambda m: [m.x1, m.y1, m.x2, m.y2]
-        request_coordinates = get_coord(measurement)
-        if not all(request_coordinates):
-            measurement.x1 = 0
-            measurement.y1 = 0.5
-            measurement.x2 = 1
-            measurement.y2 = 0.5
-
-        coordinate_cond = [all([isinstance(c, int), 0<=c<=1])
+        coordinate_cond = [all([isinstance(c, float), 0<=c<=1])
                            for c in get_coord(measurement)]
         if not all(coordinate_cond):
-            measurement.x1 = 0
+            measurement.x1 = 0.0
             measurement.y1 = 0.5
-            measurement.x2 = 1
+            measurement.x2 = 1.0
             measurement.y2 = 0.5
         with self.crud_measurement.db.get_session() as session:
             saved = self.crud_measurement.create_item(session=session,
